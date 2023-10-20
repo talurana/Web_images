@@ -3,9 +3,10 @@ from fastapi.responses import RedirectResponse
 from fastapi.staticfiles import StaticFiles
 app = FastAPI()
 
-app.mount("/about", StaticFiles(directory="templates"), name="about.html")
+app.mount("/index", StaticFiles(directory="templates", html=True))
 
-@app.get("/")
+
+@app.get("/root")
 async def root():
     data = 'Hello basic page'
     return RedirectResponse("/hello/{name}")
