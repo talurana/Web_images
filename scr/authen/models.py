@@ -31,6 +31,7 @@ user = Table(
 )
 
 
+# for fastapi users
 class User(SQLAlchemyBaseUserTable[int], Base):
     id = Column(Integer, primary_key=True)
     email = Column(String, nullable=False)
