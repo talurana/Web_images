@@ -1,7 +1,7 @@
-from fastapi import APIRouter, Depends, Query
-from sqlalchemy import select
+from fastapi import APIRouter, Depends, Query, HTTPException, Header
+from sqlalchemy import select, update
 from sqlalchemy.ext.asyncio import AsyncSession
-import typing
+from typing import List
 
 from scr.database import get_async_session
 from .models import image
@@ -21,3 +21,23 @@ async def get_image(session: AsyncSession = Depends(get_async_session)):
 
     return image_data
 
+
+@router.post('/update/{image.id}')
+async def classify(name: str, attribute: str, x_user_id: str = Header(None, alias="X-User-Id"),
+                   session: AsyncSession = Depends(get_async_session)):
+    if not x_user_id:
+        raise HTTPException(status_code=401, detail="Неавторизованный запрос")
+
+    update_image = (
+        update(image)
+        .where(image.c.file_name == name)
+        .values(
+            attributes=attribute,
+            edited_by=int(x_user_id)
+        )
+    )
+
+    await session.execute(update_image)
+    await session.commit()
+
+    return {"message": "Изображение обновлено успешно"}

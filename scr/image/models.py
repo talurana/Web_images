@@ -1,4 +1,4 @@
-from sqlalchemy import Table, MetaData, Column, Integer, String
+from sqlalchemy import Table, MetaData, Column, Integer, String, ForeignKey
 from scr.authen.models import user
 
 metadata = MetaData()
@@ -10,5 +10,5 @@ image = Table(
     Column("file_name", String, unique=True, nullable=False),
     Column("url", String, unique=True, nullable=False),
     Column('attributes', String),
-    # Column('edited_by', ForeignKey(user.c.id)),
+    Column('edited_by', ForeignKey(user.c.id)),
 )
