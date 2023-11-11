@@ -18,9 +18,11 @@ async def get_image(
         offset: int = Query(0, alias="offset", description="Номер элемента, с которого нужно начать."),
         filter_str: str = Query(None, alias="filter", description="Строковое значение для фильтрации."),
         session: AsyncSession = Depends(get_async_session)):
-    query = select(image)
+    columns_to_select = [image.columns.file_name, image.columns.url, image.columns.attributes]
+
+    query = select(*columns_to_select)
     if filter_str:
-        query = query.where(image.c.file_name.ilike(f"%{filter_str}%"))
+        query = query.where(image.c.file_name.ilike(f"{filter_str}%"))
         total_nb_query = select(func.count()).select_from(image).where(image.c.file_name.ilike(f"%{filter_str}%"))
 
     else:
