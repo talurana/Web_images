@@ -1,10 +1,12 @@
+import json
+
 from fastapi import APIRouter, Depends, Query, HTTPException, Header
 from sqlalchemy import select, update, func
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from scr.database import get_async_session
 from .models import image
-from .schemas import ImageCreate
+from .schemas import ImageUpdate
 
 router = APIRouter(
     prefix='/image',
@@ -33,7 +35,16 @@ async def get_image(
     query = query.limit(limit).offset(offset)
     rows = await session.execute(query)
 
-    image_data = [row._asdict() for row in rows]
+    image_data = []
+    for row in rows:
+        row_dict = row._asdict()
+        try:
+            row_dict['attributes'] = json.loads(row_dict['attributes']) if row_dict['attributes'] else None
+        except json.JSONDecodeError as e:
+            # Log the problematic data and set 'attributes' to None
+            print(f"Error decoding JSON in 'attributes' column. Data: {row_dict['attributes']}. Error: {e}")
+            # row_dict['attributes'] = list(row_dict['attributes'][1:-1].split(', '))
+        image_data.append(row_dict)
 
     pagination = {
         "size": len(image_data),
@@ -49,16 +60,18 @@ async def get_image(
 
 
 @router.post('/update/{name}')
-async def classify(name: str, attribute: str, x_user_id: str = Header(None, alias="X-User-Id"),
+async def classify(name: str, attribute: ImageUpdate, x_user_id: str = Header(None, alias="X-User-Id"),
                    session: AsyncSession = Depends(get_async_session)):
     if not x_user_id:
         raise HTTPException(status_code=401, detail="Неавторизованный запрос")
+
+    attributes_list = attribute.attributes
 
     update_image = (
         update(image)
         .where(image.c.file_name == name)
         .values(
-            attributes=attribute,
+            attributes=json.dumps(attributes_list, ensure_ascii=False),
             edited_by=int(x_user_id)
         )
     )
