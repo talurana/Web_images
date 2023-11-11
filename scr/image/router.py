@@ -23,7 +23,7 @@ async def get_image(
     query = select(*columns_to_select)
     if filter_str:
         query = query.where(image.c.file_name.ilike(f"{filter_str}%"))
-        total_nb_query = select(func.count()).select_from(image).where(image.c.file_name.ilike(f"%{filter_str}%"))
+        total_nb_query = select(func.count()).select_from(image).where(image.c.file_name.ilike(f"{filter_str}%"))
 
     else:
         total_nb_query = select(func.count()).select_from(image)
