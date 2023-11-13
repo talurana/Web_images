@@ -20,6 +20,7 @@ async def get_image(
         offset: int = Query(0, alias="offset", description="Номер элемента, с которого нужно начать."),
         filter_str: str = Query(None, alias="filter", description="Строковое значение для фильтрации."),
         session: AsyncSession = Depends(get_async_session)):
+
     query = select(
         image.columns.file_name,
         image.columns.url,
@@ -30,10 +31,12 @@ async def get_image(
         query = query.where(image.c.file_name.ilike(f"{filter_str}%"))
         total_nb_query = total_nb_query.where(image.c.file_name.ilike(f"{filter_str}%"))
 
+
     total_nb = await session.scalar(total_nb_query)
 
     query = query.limit(limit).offset(offset)
     rows = await session.execute(query)
+
 
     image_data = [
         dict(
@@ -42,6 +45,7 @@ async def get_image(
             attributes=json.loads(row[2]) if row[2] else None
         ) for row in rows
     ]
+
 
     return {
         "data": image_data,
@@ -57,6 +61,8 @@ async def classify(name: str, attribute: ImageUpdate, x_user_id: str = Header(No
                    session: AsyncSession = Depends(get_async_session)):
     if not x_user_id:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Неавторизованный запрос")
+
+    attributes_list = attribute.attributes
 
     attributes_list = attribute.attributes
 
