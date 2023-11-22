@@ -1,5 +1,5 @@
 from typing import Optional
-
+from .models import User
 from fastapi_users import schemas
 
 
@@ -26,8 +26,8 @@ class UserCreate(schemas.BaseUserCreate):
     password: str
 
 
-class UserUpdate(schemas.BaseUser):
-    email: str
-    name: str
-    surname: str
-    middle_name: str
+class UserUpdate(schemas.BaseUserUpdate):
+    email: Optional[str] = User.email
+    name: Optional[str] = User.name
+    surname: Optional[str] = User.surname
+    middle_name: Optional[str] = User.middle_name
