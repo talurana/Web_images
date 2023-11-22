@@ -27,7 +27,7 @@ class UserCreate(schemas.BaseUserCreate):
 
 
 class UserUpdate(schemas.BaseUserUpdate):
-    email: Optional[str] = User.email
-    name: Optional[str] = User.name
-    surname: Optional[str] = User.surname
-    middle_name: Optional[str] = User.middle_name
+    email: Optional[str] = None
+    name: Optional[str] = None
+    surname: Optional[str] = None
+    middle_name: Optional[str] = None
