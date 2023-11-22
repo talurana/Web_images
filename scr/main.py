@@ -4,14 +4,11 @@ from .authen.base_config import auth_backend, fastapi_users
 from .authen.schemas import UserRead, UserCreate, UserUpdate
 
 from .image.router import router as router_image
-from .authen.router import router as router_authen
-
+from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI(
     title="Web Images"
 )
-
-from fastapi.middleware.cors import CORSMiddleware
 
 
 app.add_middleware(
@@ -36,10 +33,6 @@ app.include_router(
 
 app.include_router(
     router_image
-)
-
-app.include_router(
-    router_authen
 )
 
 app.include_router(fastapi_users.get_users_router(UserRead, UserUpdate), prefix="/users", tags=["users"])
