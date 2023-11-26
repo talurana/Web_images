@@ -14,4 +14,5 @@ class ImageCreate(BaseModel):
 
 class ImageUpdate(BaseModel):
     attributes: List[str]
+    email: str
 
