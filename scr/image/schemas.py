@@ -1,11 +1,10 @@
 from typing import List
-
 from pydantic import BaseModel, ConfigDict
-
+# pydantic schemas
 
 class ImageCreate(BaseModel):
     id: int
-    file_name: str
+    image_name: str
     url: str
     attributes: List[str]
 
@@ -13,6 +12,5 @@ class ImageCreate(BaseModel):
 
 
 class ImageUpdate(BaseModel):
-    attributes: List[str]
-    email: str
-
+    image_attributes: List[str]
+    image_name: str

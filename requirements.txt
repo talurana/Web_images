@@ -6,3 +6,5 @@ python-dotenv~=1.0.0
 alembic~=1.12.1
 pydantic~=2.4.2
 psycopg2-binary==2.9.6
+fastapi-users[sqlalchemy]==12.1.2
+asyncpg==0.29.0

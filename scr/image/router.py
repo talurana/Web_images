@@ -1,39 +1,42 @@
 import json
 
-from fastapi import APIRouter, Depends, Query, HTTPException, Header, status
+from typing import List
+from fastapi import APIRouter, Depends, Query
 from sqlalchemy import select, update, func
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from scr.database import get_async_session
-from .models import image
+from scr.db import get_async_session
+from .models import Image
+from scr.auth.users import current_active_user
 from .schemas import ImageUpdate
+from scr.auth.models import User
 
-router = APIRouter(
-    prefix='/image',
+# create special "url dir" where we place all.py about
+image_router = APIRouter(
+    prefix='/images',
     tags=['Images']
 )
 
 
-@router.get('/search_image')
+def get_lower_attribute_names(attribute_names: List[str]):
+    return [attribute.lower() for attribute in attribute_names]
+
+
+@image_router.get('/search_image')
 async def get_image(
+        # write params that will be in link after questtion sign : "...search_image?limit=10&offset=0"
         limit: int = Query(10, alias="limit", description="Количество элементов, которые нужно вернуть."),
         offset: int = Query(0, alias="offset", description="Номер элемента, с которого нужно начать."),
         filter_str: str = Query(None, alias="filter", description="Строковое значение для фильтрации."),
-        session: AsyncSession = Depends(get_async_session)):
-
-    query = select(
-        image.columns.file_name,
-        image.columns.url,
-        image.columns.attributes
-    )
-    total_nb_query = select(func.count()).select_from(image)
+        # for code logic we use depedency injection: FastAPi search function that called like get_async_session
+        session: AsyncSession = Depends(get_async_session)
+):
+    # get images from filter
+    query = select(Image.image_name, Image.url, Image.attributes)
     if filter_str:
-        query = query.where(image.c.file_name.ilike(f"{filter_str}%"))
-        total_nb_query = total_nb_query.where(image.c.file_name.ilike(f"{filter_str}%"))
+        query = query.where(Image.image_name.ilike(f"{filter_str}%"))
 
-    total_nb = await session.scalar(total_nb_query)
-
-    query = query.limit(limit).offset(offset)
+    query = query.limit(limit).offset(offset)  # pagination
     rows = await session.execute(query)
 
     image_data = [
@@ -44,6 +47,13 @@ async def get_image(
         ) for row in rows
     ]
 
+    # for frontend pagination
+    total_nb_query = select(func.count()).select_from(Image)
+    if filter_str:
+        total_nb_query = total_nb_query.where(Image.image_name.ilike(f"{filter_str}%"))
+    total_nb = await session.scalar(total_nb_query)
+
+    # return answer
     return {
         "data": image_data,
         "pagination": {
@@ -53,24 +63,23 @@ async def get_image(
     }
 
 
-@router.post('/update/{name}')
-async def classify(name: str, attribute: ImageUpdate,
-                   session: AsyncSession = Depends(get_async_session)):
-    user_email = attribute.email
-    if not user_email:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Неавторизованный запрос")
+@image_router.post('/update/{name}')
+async def update_image(
+        req_params: ImageUpdate,
+        cur_user: User = Depends(current_active_user),
+        session: AsyncSession = Depends(get_async_session)
+):
+    attributes_list = get_lower_attribute_names(req_params.image_attributes)
 
-    attributes_list = attribute.attributes
-
-    update_image = (
-        update(image)
-        .where(image.c.file_name == name)
+    update_image_query = (
+        update(Image)
+        .where(Image.image_name == req_params.image_name)
         .values(
             attributes=json.dumps(attributes_list, ensure_ascii=False),
-            edited_by_email=user_email,
+            edited_by_email=cur_user.email,
         )
     )
     async with session.begin():
-        await session.execute(update_image)
+        await session.execute(update_image_query)
 
     return {"message": "Изображение обновлено успешно"}
