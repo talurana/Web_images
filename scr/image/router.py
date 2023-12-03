@@ -1,6 +1,6 @@
 import json
 
-from typing import List
+from typing import List, Optional
 from fastapi import APIRouter, Depends, Query
 from sqlalchemy import select, update, func
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -28,6 +28,7 @@ async def get_image(
         limit: int = Query(10, alias="limit", description="Количество элементов, которые нужно вернуть."),
         offset: int = Query(0, alias="offset", description="Номер элемента, с которого нужно начать."),
         filter_str: str = Query(None, alias="filter", description="Строковое значение для фильтрации."),
+        is_marked: bool|None = Query(None, description='Есть ли маркировка у изображения'),
         # for code logic we use depedency injection: FastAPi search function that called like get_async_session
         session: AsyncSession = Depends(get_async_session)
 ):
@@ -35,6 +36,10 @@ async def get_image(
     query = select(Image.image_name, Image.url, Image.attributes)
     if filter_str:
         query = query.where(Image.image_name.ilike(f"{filter_str}%"))
+    if is_marked is True:
+        query = query.where(Image.attributes != None)
+    elif is_marked is False:
+        query = query.where(Image.attributes == None)
 
     query = query.limit(limit).offset(offset)  # pagination
     rows = await session.execute(query)
@@ -76,10 +81,11 @@ async def update_image(
         .where(Image.image_name == req_params.image_name)
         .values(
             attributes=json.dumps(attributes_list, ensure_ascii=False),
-            edited_by_email=cur_user.email,
+            last_change=cur_user.email,
         )
     )
-    async with session.begin():
-        await session.execute(update_image_query)
+
+    await session.execute(update_image_query)
+    await session.commit()
 
     return {"message": "Изображение обновлено успешно"}

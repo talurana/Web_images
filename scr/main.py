@@ -14,7 +14,7 @@ app = FastAPI(
 # decorators for all.py request
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000", "http://localhost:3000/register"],  # Разрешенные источники
+    allow_origins=["*"],  # Разрешенные источники
     allow_credentials=True,
     allow_methods=["*"],  # Разрешенные методы
     allow_headers=["*"],  # Разрешенные заголовки

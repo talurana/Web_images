@@ -3,13 +3,16 @@ from fastapi_users import schemas
 
 class UserRead(schemas.BaseUser[int]):
     """Pydatic model for UserRead"""
-    pass
+    middle_name: str
+    name: str
+    surname: str
 
 
 class UserCreate(schemas.BaseUserCreate):
     """Pydatic model for UserCreate"""
-
-    pass
+    middle_name: str
+    name: str
+    surname: str
 
 
 class UserUpdate(schemas.BaseUserUpdate):

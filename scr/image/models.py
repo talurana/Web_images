@@ -2,7 +2,7 @@ from sqlalchemy import Column, Integer, String, ForeignKey #, Table, BigInteger
 
 from scr.db import Base
 
-# можно в будущем сделать через Many2Many, но сервис будет максимум 0.5rps, потмоу не хочется тратить на это 1000 лет
+# можно в будущем сделать через Many2Many, но сервис будет максимум 0.5rps, потому не хочется тратить на это 1000 лет
 
 # attribute2image = Table('attribute2image', Base.metadata,
 #     Column('id', BigInteger, primary_key=True),
