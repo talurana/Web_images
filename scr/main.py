@@ -1,6 +1,6 @@
-from fastapi import FastAPI, Depends
+from fastapi import FastAPI, Depends, Request
 from fastapi.middleware.cors import CORSMiddleware
-
+import time
 from scr.auth.users import auth_backend, fastapi_users, current_active_user
 from scr.auth.schemas import UserRead, UserCreate, UserUpdate
 from scr.image.router import image_router
@@ -10,11 +10,14 @@ app = FastAPI(
     title="Web Images",
     description='Swagger for backend endpoints'
 )
+origins = [
+    "http://localhost:3000",  # Adjust this to match the origin of your frontend
+]
 
 # decorators for all.py request
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Разрешенные источники
+    allow_origins=origins,  # Разрешенные источники
     allow_credentials=True,
     allow_methods=["*"],  # Разрешенные методы
     allow_headers=["*"],  # Разрешенные заголовки

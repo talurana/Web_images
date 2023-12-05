@@ -28,7 +28,7 @@ async def get_image(
         limit: int = Query(10, alias="limit", description="Количество элементов, которые нужно вернуть."),
         offset: int = Query(0, alias="offset", description="Номер элемента, с которого нужно начать."),
         filter_str: str = Query(None, alias="filter", description="Строковое значение для фильтрации."),
-        is_marked: bool|None = Query(None, description='Есть ли маркировка у изображения'),
+        is_marked: str = Query(None, description='Есть ли маркировка у изображения'),
         # for code logic we use depedency injection: FastAPi search function that called like get_async_session
         session: AsyncSession = Depends(get_async_session)
 ):
@@ -36,10 +36,11 @@ async def get_image(
     query = select(Image.image_name, Image.url, Image.attributes)
     if filter_str:
         query = query.where(Image.image_name.ilike(f"{filter_str}%"))
-    if is_marked is True:
+    if is_marked == 'true':
         query = query.where(Image.attributes != None)
-    elif is_marked is False:
+    elif is_marked == 'false':
         query = query.where(Image.attributes == None)
+
 
     query = query.limit(limit).offset(offset)  # pagination
     rows = await session.execute(query)
