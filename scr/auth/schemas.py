@@ -17,4 +17,6 @@ class UserCreate(schemas.BaseUserCreate):
 
 class UserUpdate(schemas.BaseUserUpdate):
     """Pydatic model for UserUpdate"""
-    pass
+    middle_name: str
+    name: str
+    surname: str
