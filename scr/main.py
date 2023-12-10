@@ -32,7 +32,7 @@ def verify_password(credentials: HTTPBasicCredentials = Depends(security)):
         )
 
 origins = [
-    "http://localhost:3000",  # Adjust this to match the origin of your frontend
+    "*",  # Adjust this to match the origin of your frontend
 ]
 
 # decorators for all.py request
