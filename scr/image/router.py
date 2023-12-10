@@ -13,7 +13,7 @@ from scr.auth.models import User
 
 # create special "url dir" where we place all.py about
 image_router = APIRouter(
-    prefix='/images',
+    prefix='/api/images',
     tags=['Images']
 )
 
