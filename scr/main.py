@@ -86,4 +86,4 @@ async def authenticated_route(user=Depends(current_active_user)):
 
 @app.get("/api/docs", include_in_schema=False)
 async def custom_docs(verified: bool = Depends(verify_password)):
-    return get_swagger_ui_html(openapi_url="/openapi.json", title="Custom Docs")
+    return get_swagger_ui_html(openapi_url="/api/openapi.json", title="Custom Docs")
