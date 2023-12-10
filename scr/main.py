@@ -17,6 +17,7 @@ app = FastAPI(
 
 security = HTTPBasic()
 
+
 # Функция для проверки пароля
 def verify_password(credentials: HTTPBasicCredentials = Depends(security)):
     correct_username = "admin"  # Установите имя пользователя
@@ -30,6 +31,7 @@ def verify_password(credentials: HTTPBasicCredentials = Depends(security)):
             detail="Неверные учетные данные",
             headers={"WWW-Authenticate": "Basic"},
         )
+
 
 origins = [
     "*",  # Adjust this to match the origin of your frontend
@@ -51,26 +53,28 @@ app.include_router(
 
 # add auth routers
 app.include_router(
-    fastapi_users.get_auth_router(auth_backend), prefix="/auth/jwt", tags=["auth"]
+    fastapi_users.get_auth_router(auth_backend),
+    prefix="/api/auth/jwt",
+    tags=["auth"]
 )
 app.include_router(
     fastapi_users.get_register_router(UserRead, UserCreate),
-    prefix="/auth",
+    prefix="/api/auth",
     tags=["auth"],
 )
 app.include_router(
     fastapi_users.get_reset_password_router(),
-    prefix="/auth",
+    prefix="/api/auth",
     tags=["auth"],
 )
 app.include_router(
     fastapi_users.get_verify_router(UserRead),
-    prefix="/auth",
+    prefix="/api/auth",
     tags=["auth"],
 )
 app.include_router(
     fastapi_users.get_users_router(UserRead, UserUpdate),
-    prefix="/users",
+    prefix="/api/users",
     tags=["users"],
 )
 
@@ -79,6 +83,7 @@ app.include_router(
 async def authenticated_route(user=Depends(current_active_user)):
     return {"message": f"Hello {user.email}!"}
 
-@app.get("/docs", include_in_schema=False)
+
+@app.get("/api/docs", include_in_schema=False)
 async def custom_docs(verified: bool = Depends(verify_password)):
-    return get_swagger_ui_html(openapi_url="/openapi.json", title="Custom Docs")
+    return get_swagger_ui_html(openapi_url="/api/openapi.json", title="Custom Docs")
